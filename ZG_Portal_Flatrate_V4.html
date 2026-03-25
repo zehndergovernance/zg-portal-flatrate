@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Compliance Portal Standard — Zehnder Governance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+:root{--ink:#07100a;--forest:#0b1f12;--pine:#132d1a;--moss:#245430;--sage:#357a45;--gold:#c08c28;--gold-l:#d4a94a;--border:rgba(192,140,40,.13);--radius:12px;--muted:#6e8278;}
+*{box-sizing:border-box;margin:0;padding:0;}html{scroll-behavior:smooth;}
+body{background:var(--ink);color:#fff;font-family:'Outfit',sans-serif;min-height:100vh;line-height:1.6;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--gold);}
+a{text-decoration:none;color:inherit;}
+
+/* ── AUTH OVERLAY ── */
+#authOverlay{position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;}
+#authOverlay.hidden{display:none;}
+.auth-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:420px;width:100%;text-align:center;}
+.auth-logo{font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:700;color:var(--gold);letter-spacing:.15em;text-transform:uppercase;margin-bottom:28px;}
+.auth-box h2{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:#fff;margin-bottom:8px;}
+.auth-box p{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:28px;line-height:1.6;font-weight:300;}
+.auth-input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 16px;font-size:14px;color:#fff;font-family:'Outfit',sans-serif;margin-bottom:12px;transition:border-color .2s;outline:none;}
+.auth-input:focus{border-color:rgba(192,140,40,.4);}
+.auth-input::placeholder{color:rgba(255,255,255,.3);}
+.auth-btn{width:100%;background:var(--gold);color:var(--ink);border:none;border-radius:8px;padding:13px;font-size:14px;font-weight:600;font-family:'Outfit',sans-serif;cursor:pointer;transition:all .2s;margin-top:4px;}
+.auth-btn:hover{background:var(--gold-l);}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;}
+.auth-err{font-size:12px;color:#e07070;margin-top:8px;display:none;}
+.auth-info{font-size:12px;color:rgba(255,255,255,.35);margin-top:16px;line-height:1.6;}
+.auth-info a{color:var(--gold);}
+.auth-divider{border:none;border-top:1px solid rgba(255,255,255,.08);margin:20px 0;}
+.forgot-link{font-size:12px;color:var(--gold);cursor:pointer;margin-top:12px;display:block;}
+.forgot-link:hover{color:var(--gold-l);}
+.no-access-box{text-align:center;}
+.no-access-box .icon{font-size:48px;margin-bottom:16px;}
+.no-access-box h2{font-family:'Cormorant Garamond',serif;font-size:24px;color:#fff;margin-bottom:8px;}
+.no-access-box p{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:24px;line-height:1.6;}
+.buy-btn{display:inline-block;background:var(--gold);color:var(--ink);padding:12px 28px;border-radius:9px;font-size:14px;font-weight:600;}
+.buy-btn:hover{background:var(--gold-l);}
+
+/* ── LOADING ── */
+#loadingScreen{position:fixed;inset:0;background:var(--ink);z-index:9998;display:flex;align-items:center;justify-content:center;}
+#loadingScreen.hidden{display:none;}
+.loader{width:32px;height:32px;border:2.5px solid rgba(192,140,40,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── HEADER ── */
+header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);padding:0 24px;height:60px;display:flex;align-items:center;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.lm{width:34px;height:34px;border-radius:8px;background:linear-gradient(145deg,var(--moss),var(--pine));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--gold);}
+.ln{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:#fff;}.ln em{color:var(--gold);font-style:normal;}
+.hplan{margin-left:12px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);}
+.hright{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.hback{font-size:12px;color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);padding:5px 12px;border-radius:6px;transition:all .2s;}.hback:hover{color:#fff;}
+.hsupport{font-size:12px;color:var(--gold);padding:5px 12px;border:1px solid rgba(192,140,40,.2);border-radius:6px;}.hsupport:hover{background:rgba(192,140,40,.08);}
+.hlogout{font-size:12px;color:rgba(255,255,255,.3);padding:5px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;cursor:pointer;background:none;font-family:'Outfit',sans-serif;transition:all .2s;}.hlogout:hover{color:#fff;border-color:rgba(255,255,255,.2);}
+#userEmail{font-size:11px;color:rgba(255,255,255,.3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.wrap{max-width:1000px;margin:0 auto;padding:36px 24px 64px;}
+.welcome{background:linear-gradient(135deg,rgba(19,45,26,.8),rgba(11,31,18,.95));border:1px solid var(--border);border-radius:14px;padding:28px 32px;margin-bottom:24px;}
+.welcome h1{font-family:'Cormorant Garamond',serif;font-size:clamp(20px,3vw,28px);font-weight:600;color:#fff;margin-bottom:6px;}
+.welcome p{font-size:13.5px;color:rgba(255,255,255,.48);font-weight:300;}
+.wmeta{display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;}
+.wm{font-size:11px;color:rgba(255,255,255,.28);}.wm strong{color:var(--gold);}
+.status-bar{background:rgba(36,84,48,.14);border:1px solid rgba(36,84,48,.28);border-radius:8px;padding:11px 16px;margin-bottom:28px;display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(255,255,255,.58);}
+.sdot{width:7px;height:7px;border-radius:50%;background:#6ecf90;flex-shrink:0;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.status-bar strong{color:#6ecf90;}
+.sh{font-size:10.5px;color:var(--gold);font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);}
+.qbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+.qb{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:500;border:1px solid rgba(255,255,255,.09);color:rgba(255,255,255,.48);background:rgba(255,255,255,.03);transition:all .18s;display:flex;align-items:center;gap:6px;}.qb:hover{border-color:rgba(192,140,40,.28);color:var(--gold-l);background:rgba(192,140,40,.05);}
+.tool-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:32px;}
+.tc{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:var(--radius);padding:22px;transition:all .22s;position:relative;overflow:hidden;}
+.tc:hover{border-color:rgba(192,140,40,.28);transform:translateY(-2px);}
+.tc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .28s;}
+.tc:hover::after{transform:scaleX(1);}
+.tc-icon{font-size:26px;margin-bottom:12px;}
+.tc-tag{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-bottom:9px;}
+.tag-free{background:rgba(61,138,80,.12);color:#6ecf90;}
+.tag-inc{background:rgba(192,140,40,.1);color:var(--gold);}
+.tc h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#fff;margin-bottom:5px;line-height:1.2;}
+.tc p{font-size:12.5px;color:rgba(255,255,255,.45);line-height:1.6;font-weight:300;margin-bottom:14px;}
+.tc-btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:600;border:none;font-family:'Outfit',sans-serif;transition:all .2s;cursor:pointer;}
+.btn-g{background:var(--gold);color:var(--ink);}.btn-g:hover{background:var(--gold-l);}
+.tcat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.tcat-hd{padding:16px 20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .2s;}
+.tcat-hd:hover{background:rgba(255,255,255,.04);}
+.tcat-hd.open{background:rgba(192,140,40,.06);border-bottom:1px solid rgba(192,140,40,.12);}
+.tcat-left{display:flex;align-items:center;gap:12px;}
+.tcat-icon{font-size:18px;}
+.tcat-title{font-size:14px;font-weight:600;color:#fff;}
+.tcat-sub{font-size:11px;color:rgba(255,255,255,.3);}
+.tcat-arr{font-size:12px;color:rgba(255,255,255,.3);transition:transform .25s;}
+.tcat-hd.open .tcat-arr{transform:rotate(180deg);}
+.tcat-body{display:none;padding:16px 20px;}
+.tcat-body.open{display:block;}
+.tcat-desc{font-size:12.5px;color:rgba(255,255,255,.42);margin-bottom:14px;font-weight:300;}
+.tlist{list-style:none;}
+.tlist li{font-size:13px;color:rgba(255,255,255,.62);padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;justify-content:space-between;align-items:center;}
+.tlist li:last-child{border:none;}
+.tdl{font-size:11px;font-weight:600;color:var(--gold);cursor:pointer;transition:color .2s;white-space:nowrap;padding:3px 8px;border:1px solid rgba(192,140,40,.2);border-radius:4px;}.tdl:hover{background:rgba(192,140,40,.1);}
+.tcat-all{display:inline-flex;align-items:center;gap:5px;margin-top:14px;font-size:12px;font-weight:600;color:var(--gold);border:1px solid rgba(192,140,40,.2);padding:7px 14px;border-radius:6px;transition:all .2s;cursor:pointer;}.tcat-all:hover{background:rgba(192,140,40,.08);}
+.upsell-box{background:rgba(192,140,40,.05);border:1px solid rgba(192,140,40,.18);border-radius:var(--radius);padding:24px 28px;margin-bottom:32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;}
+.ub-left h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:#fff;margin-bottom:6px;}
+.ub-left p{font-size:13px;color:rgba(255,255,255,.45);line-height:1.6;font-weight:300;max-width:480px;}
+.ub-features{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.ub-f{font-size:11px;color:rgba(255,255,255,.35);background:rgba(255,255,255,.04);padding:3px 9px;border-radius:3px;}
+.ub-btn{background:var(--gold);color:var(--ink);padding:11px 22px;border-radius:9px;font-size:13px;font-weight:600;white-space:nowrap;transition:all .2s;display:inline-flex;align-items:center;gap:7px;flex-shrink:0;}.ub-btn:hover{background:var(--gold-l);}
+.ul{list-style:none;margin-bottom:32px;}
+.ui{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05);display:flex;gap:12px;align-items:flex-start;}
+.ui:last-child{border:none;}
+.ui-flag{font-size:16px;flex-shrink:0;margin-top:1px;}
+.ui-body{flex:1;}
+.ui-body strong{display:block;font-size:13px;color:#fff;margin-bottom:2px;}
+.ui-body span{font-size:12px;color:rgba(255,255,255,.4);line-height:1.5;}
+.ui-action{font-size:11px;color:var(--gold);margin-top:4px;display:block;}
+.ui-date{font-size:11px;color:rgba(255,255,255,.22);flex-shrink:0;white-space:nowrap;}
+@media(max-width:680px){.tool-grid{grid-template-columns:1fr;}.upsell-box{flex-direction:column;}.qbar{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingScreen"><div class="loader"></div></div>
+
+<!-- AUTH OVERLAY -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">Zehnder Governance</div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginBox">
+      <h2>Portal-Zugang</h2>
+      <p>Melden Sie sich mit Ihren Zugangsdaten an. Nach dem Kauf erhalten Sie per E-Mail einen Link zum Einrichten Ihres Passworts.</p>
+      <input type="email" id="emailInput" class="auth-input" placeholder="E-Mail-Adresse">
+      <input type="password" id="passwordInput" class="auth-input" placeholder="Passwort">
+      <div class="auth-err" id="authError">Anmeldung fehlgeschlagen. Bitte prüfen Sie Ihre Zugangsdaten.</div>
+      <button class="auth-btn" id="loginBtn" onclick="doLogin()">Einloggen →</button>
+      <span class="forgot-link" onclick="doForgotPassword()">Passwort vergessen?</span>
+      <hr class="auth-divider">
+      <div class="auth-info">Noch kein Abonnement? <a href="https://buy.stripe.com/9B6bIT5hc5BLeap7Zm5Rm00">Compliance Flatrate Standard — CHF 149/Mo. →</a></div>
+    </div>
+
+    <!-- KEIN ZUGANG -->
+    <div id="noAccessBox" class="no-access-box" style="display:none">
+      <div class="icon">🔒</div>
+      <h2>Kein aktives Abonnement</h2>
+      <p>Ihr Account hat keinen Zugang zum Standard-Portal. Bitte abonnieren Sie die Compliance Flatrate.</p>
+      <a href="https://buy.stripe.com/9B6bIT5hc5BLeap7Zm5Rm00" class="buy-btn">Compliance Flatrate Standard — CHF 149/Mo. →</a>
+      <hr class="auth-divider">
+      <div class="auth-info"><span style="cursor:pointer;color:var(--gold);" onclick="doLogout()">Anderes Konto verwenden</span></div>
+    </div>
+
+    <!-- PASSWORT ZURÜCKSETZEN BESTÄTIGUNG -->
+    <div id="resetBox" style="display:none">
+      <div class="icon">📧</div>
+      <h2>E-Mail gesendet</h2>
+      <p>Wir haben Ihnen einen Link zum Zurücksetzen Ihres Passworts gesendet. Bitte prüfen Sie Ihren Posteingang.</p>
+      <button class="auth-btn" onclick="showLoginBox()">Zurück zum Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL HEADER -->
+<header>
+  <div class="logo"><div class="lm">Z</div><div class="ln">ZEHNDER <em>GOVERNANCE</em></div></div>
+  <span class="hplan">Standard</span>
+  <div class="hright">
+    <span id="userEmail"></span>
+    <a href="mailto:zehndergovernance@gmail.com?subject=Support%20Standard%20Portal" class="hsupport">✉ Support</a>
+    <a href="https://zehndergovernance.com" class="hback">← Website</a>
+    <button class="hlogout" onclick="doLogout()">Ausloggen</button>
+  </div>
+</header>
+
+<!-- PORTAL INHALT -->
+<div class="wrap">
+  <div class="welcome">
+    <h1>Willkommen im Compliance Portal</h1>
+    <p>Ihr Zugriff auf Templates, Schulungen und regulatorische Updates — sofort einsatzbereit.</p>
+    <div class="wmeta">
+      <span class="wm"><strong>Plan:</strong> Compliance Flatrate Standard</span>
+      <span class="wm"><strong>Preis:</strong> CHF 149 / Monat</span>
+      <span class="wm"><strong>Support:</strong> zehndergovernance@gmail.com (48h)</span>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="sdot"></div>
+    <strong>Alle Systeme aktiv.</strong>&nbsp;Q1 2026 Update: China CSL-Revision, UK Adequacy bis 2031 verlängert, EU AI Act Verschiebung geplant.
+  </div>
+
+  <div class="sh">Schnellzugriff</div>
+  <div class="qbar">
+    <a href="https://tally.so/r/QK70vX" target="_blank" class="qb">🤖 AI Tracker starten</a>
+    <a href="https://zg-academy.vercel.app" target="_blank" class="qb">🎓 Academy öffnen</a>
+    <a href="https://zg-country-intelligence.vercel.app" target="_blank" class="qb">🌍 Country Intelligence</a>
+    <a href="mailto:zehndergovernance@gmail.com?subject=Support" class="qb">✉ Support kontaktieren</a>
+  </div>
+
+  <div class="sh">Ihre Tools</div>
+  <div class="tool-grid">
+    <div class="tc"><div class="tc-icon">🤖</div><span class="tc-tag tag-free">Kostenlos</span><h3>AI Risk Assessment</h3><p>KI-Tools in 10 Minuten bewerten — EU AI Act + Datenschutz. Ergebnis direkt per E-Mail.</p><a href="https://tally.so/r/QK70vX" target="_blank" class="tc-btn btn-g">Starten →</a></div>
+    <div class="tc"><div class="tc-icon">🎓</div><span class="tc-tag tag-inc">Inklusive</span><h3>Compliance Academy</h3><p>11 Schulungsmodule DE/EN mit Zertifikat — AI Literacy, DSGVO, nDSG, Transfers, HR und mehr.</p><a href="https://zg-academy.vercel.app" target="_blank" class="tc-btn btn-g">Academy öffnen →</a></div>
+    <div class="tc"><div class="tc-icon">🌍</div><span class="tc-tag tag-inc">Inklusive</span><h3>Country Intelligence</h3><p>TIA-Länderbewertungen nach EDPB 8-Kriterien — 13 Länder, Risikoscores, TIA-Texte kopierbar.</p><a href="https://zg-country-intelligence.vercel.app" target="_blank" class="tc-btn btn-g">Länder ansehen →</a></div>
+    <div class="tc"><div class="tc-icon">📚</div><span class="tc-tag tag-inc">Inklusive</span><h3>Template-Bibliothek</h3><p>130+ Vorlagen DE/EN — CH, EU, UK, USA und 9 weitere Jurisdiktionen. Direkt nutzbar.</p><a href="#templates" onclick="document.getElementById('templates').scrollIntoView({behavior:'smooth'})" class="tc-btn btn-g">Vorlagen öffnen →</a></div>
+  </div>
+
+  <!-- UPSELL NAVIGATOR -->
+  <div class="upsell-box">
+    <div class="ub-left">
+      <h3>🧭 Wissen Sie wo Ihre Compliance-Lücken sind?</h3>
+      <p>Der Compliance Navigator analysiert Ihr Unternehmen in 13 Jurisdiktionen mit priorisiertem Massnahmenplan. 93 Fragen, 54-Regel-Engine, 10–15 Seiten PDF-Report.</p>
+      <div class="ub-features"><span class="ub-f">13 Jurisdiktionen</span><span class="ub-f">93 Fragen</span><span class="ub-f">10–15 Seiten Report</span><span class="ub-f">CHF 490 einmalig</span></div>
+    </div>
+    <a href="https://buy.stripe.com/5kQ3cneRM2pz7M10wU5Rm02" class="ub-btn">Navigator kaufen — CHF 490 →</a>
+  </div>
+
+  <!-- UPSELL ENTERPRISE -->
+  <div class="upsell-box" style="background:rgba(36,84,48,.06);border-color:rgba(36,84,48,.22);margin-bottom:32px;">
+    <div class="ub-left">
+      <h3>⭐ Auf Enterprise upgraden</h3>
+      <p>Regulatory Radar, persönlicher Audit-Check, Quarterly Strategy Call, Priority Support 24h.</p>
+      <div class="ub-features"><span class="ub-f">Regulatory Radar inkl.</span><span class="ub-f">Jährlicher Audit-Check</span><span class="ub-f">Priority Support 24h</span><span class="ub-f">CHF 299/Mo.</span></div>
+    </div>
+    <a href="https://buy.stripe.com/bJe3cncJE9S16HX5Re5Rm05" class="ub-btn" style="background:var(--moss);color:#fff;">Enterprise sichern →</a>
+  </div>
+
+  <div class="sh" id="templates">Template-Bibliothek — 130+ Dokumente</div>
+
+  <div class="tcat"><div class="tcat-hd" onclick="tog(this)"><div class="tcat-left"><span class="tcat-icon">🔒</span><div><div class="tcat-title">Datenschutz (CH / EU / UK)</div><div class="tcat-sub">RoPA, DPIA, Datenschutzerklärungen, Breach Response</div></div></div><span class="tcat-arr">▼</span></div><div class="tcat-body"><p class="tcat-desc">Grundlegende Compliance-Dokumentation für CH, EU und UK.</p><ul class="tlist"><li><span>🇪🇺🇨🇭 Verzeichnis der Verarbeitungstätigkeiten (Controller)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV')">↓ Herunterladen</span></li><li><span>🇪🇺🇨🇭 Verzeichnis (Processor / Auftragsverarbeiter)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV')">↓ Herunterladen</span></li><li><span>🇪🇺 Datenschutz-Folgenabschätzung (DPIA)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV')">↓ Herunterladen</span></li><li><span>🇪🇺🇨🇭 Data Breach Response Plan</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV')">↓ Herunterladen</span></li><li><span>🇨🇭 Datenschutzerklärung nDSG</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV')">↓ Herunterladen</span></li><li><span>🇪🇺 Datenschutzerklärung DSGVO</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV')">↓ Herunterladen</span></li></ul><div class="tcat-all" onclick="dl('https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV')">📂 Alle Datenschutz-Vorlagen öffnen →</div></div></div>
+
+  <div class="tcat"><div class="tcat-hd" onclick="tog(this)"><div class="tcat-left"><span class="tcat-icon">📋</span><div><div class="tcat-title">Verträge & Internationale Transfers</div><div class="tcat-sub">AVV, SCCs, TIA, Joint Controller</div></div></div><span class="tcat-arr">▼</span></div><div class="tcat-body"><p class="tcat-desc">Rechtssichere Verträge und Transfermechanismen.</p><ul class="tlist"><li><span>🇪🇺🇨🇭 Auftragsverarbeitungsvertrag (AVV / DPA)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1TRQQolgnvqQtP6CTehFPZ4WqQS08TfTJ')">↓ Herunterladen</span></li><li><span>🇪🇺 EU Standard Contractual Clauses (SCCs)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1TRQQolgnvqQtP6CTehFPZ4WqQS08TfTJ')">↓ Herunterladen</span></li><li><span>🇬🇧 UK IDTA + UK Addendum</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1TRQQolgnvqQtP6CTehFPZ4WqQS08TfTJ')">↓ Herunterladen</span></li><li><span>🌍 Transfer Impact Assessment (TIA) Vorlage</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1TRQQolgnvqQtP6CTehFPZ4WqQS08TfTJ')">↓ Herunterladen</span></li><li><span>🇨🇳 China PIPL Transfer Clauses</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1TRQQolgnvqQtP6CTehFPZ4WqQS08TfTJ')">↓ Herunterladen</span></li></ul><div class="tcat-all" onclick="dl('https://drive.google.com/drive/u/2/folders/1TRQQolgnvqQtP6CTehFPZ4WqQS08TfTJ')">📂 Alle Transfer-Vorlagen öffnen →</div></div></div>
+
+  <div class="tcat"><div class="tcat-hd" onclick="tog(this)"><div class="tcat-left"><span class="tcat-icon">🤖</span><div><div class="tcat-title">KI-Governance / EU AI Act</div><div class="tcat-sub">AI Policy, Risk Assessment, Inventory, Literacy</div></div></div><span class="tcat-arr">▼</span></div><div class="tcat-body"><p class="tcat-desc">Alle Vorlagen zur Umsetzung des EU AI Act.</p><ul class="tlist"><li><span>AI Acceptable Use Policy (Mitarbeitende)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1cWvExQUcKFCsvQI65Wl-2rdKAXagBdcj')">↓ Herunterladen</span></li><li><span>AI Risk Assessment Template</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1cWvExQUcKFCsvQI65Wl-2rdKAXagBdcj')">↓ Herunterladen</span></li><li><span>AI Inventory / KI-Systemverzeichnis</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1cWvExQUcKFCsvQI65Wl-2rdKAXagBdcj')">↓ Herunterladen</span></li><li><span>AI Literacy Nachweis (Art. 4 EU AI Act)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1cWvExQUcKFCsvQI65Wl-2rdKAXagBdcj')">↓ Herunterladen</span></li><li><span>AI Vendor Due Diligence Checklist</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1cWvExQUcKFCsvQI65Wl-2rdKAXagBdcj')">↓ Herunterladen</span></li></ul><div class="tcat-all" onclick="dl('https://drive.google.com/drive/u/2/folders/1cWvExQUcKFCsvQI65Wl-2rdKAXagBdcj')">📂 Alle KI-Vorlagen öffnen →</div></div></div>
+
+  <div class="tcat"><div class="tcat-hd" onclick="tog(this)"><div class="tcat-left"><span class="tcat-icon">🇺🇸</span><div><div class="tcat-title">USA (CCPA / CPRA)</div><div class="tcat-sub">California Privacy, Do Not Sell, Service Provider</div></div></div><span class="tcat-arr">▼</span></div><div class="tcat-body"><p class="tcat-desc">CCPA/CPRA-konforme Vorlagen für US-Kundenkontakt.</p><ul class="tlist"><li><span>California Privacy Notice (CCPA/CPRA)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1ArGPLsvpByJDFH1C2hEXfK9Q_kgoTslD')">↓ Herunterladen</span></li><li><span>Do Not Sell / Share Opt-Out</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1ArGPLsvpByJDFH1C2hEXfK9Q_kgoTslD')">↓ Herunterladen</span></li><li><span>CCPA Service Provider Agreement</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1ArGPLsvpByJDFH1C2hEXfK9Q_kgoTslD')">↓ Herunterladen</span></li></ul><div class="tcat-all" onclick="dl('https://drive.google.com/drive/u/2/folders/1ArGPLsvpByJDFH1C2hEXfK9Q_kgoTslD')">📂 Alle USA-Vorlagen öffnen →</div></div></div>
+
+  <div class="tcat"><div class="tcat-hd" onclick="tog(this)"><div class="tcat-left"><span class="tcat-icon">🎓</span><div><div class="tcat-title">Schulungsmodule (S01–S13)</div><div class="tcat-sub">11 Module DE/EN — mit Zertifikat via Academy</div></div></div><span class="tcat-arr">▼</span></div><div class="tcat-body"><p class="tcat-desc">11 Module als Word-Dokumente. Interaktiv mit Zertifikat über die Academy.</p><ul class="tlist"><li><span>S01 — Datenschutz Grundlagen</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1h1kNjdWqfBW4Gdnf1dBsDhKmLNv79z2f')">↓ Herunterladen</span></li><li><span>S04 — AI Literacy (Art. 4 EU AI Act)</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1h1kNjdWqfBW4Gdnf1dBsDhKmLNv79z2f')">↓ Herunterladen</span></li><li><span>S07 — HR & Recruiting / Bewerberdaten</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1h1kNjdWqfBW4Gdnf1dBsDhKmLNv79z2f')">↓ Herunterladen</span></li><li><span>S12 — EU AI Act für Entscheider</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1h1kNjdWqfBW4Gdnf1dBsDhKmLNv79z2f')">↓ Herunterladen</span></li><li><span>S13 — Internationale Datentransfers</span><span class="tdl" onclick="dl('https://drive.google.com/drive/u/2/folders/1h1kNjdWqfBW4Gdnf1dBsDhKmLNv79z2f')">↓ Herunterladen</span></li></ul><div class="tcat-all" onclick="dl('https://drive.google.com/drive/u/2/folders/1h1kNjdWqfBW4Gdnf1dBsDhKmLNv79z2f')">📂 Alle Schulungsmodule öffnen →</div></div></div>
+
+  <div class="sh" style="margin-top:32px;">Regulatorische Updates — Q1 2026</div>
+  <ul class="ul">
+    <li class="ui"><span class="ui-flag">🇨🇳</span><div class="ui-body"><strong>China: Revidiertes Cybersecurity-Gesetz ab 1.1.2026</strong><span>Bussen bis CHF 1,4 Mio. Neuer PIP-Zertifizierungsmechanismus aktiv.</span><a href="https://zg-country-intelligence.vercel.app" target="_blank" class="ui-action">→ China TIA-Bewertung prüfen</a></div><span class="ui-date">Jan 2026</span></li>
+    <li class="ui"><span class="ui-flag">🇬🇧</span><div class="ui-body"><strong>UK: Angemessenheitsbeschluss bis 2031 verlängert</strong><span>Kein Handlungsbedarf für bestehende UK-Transfers.</span></div><span class="ui-date">Jan 2026</span></li>
+    <li class="ui"><span class="ui-flag">🤖</span><div class="ui-body"><strong>EU AI Act: Hochrisiko-Pflichten voraussichtlich bis Dez. 2027 verschoben</strong><span>Art. 4 AI Literacy bereits in Kraft. Nachweis sicherstellen.</span><a href="https://zg-academy.vercel.app" target="_blank" class="ui-action">→ S04 AI Literacy in der Academy starten</a></div><span class="ui-date">Nov 2025</span></li>
+    <li class="ui"><span class="ui-flag">🇪🇺</span><div class="ui-body"><strong>EDPB 2026: Schwerpunkt Transparenzpflichten</strong><span>Datenschutzerklärungen auf Vollständigkeit prüfen (Art. 12–14 DSGVO).</span><a href="https://drive.google.com/drive/u/2/folders/1KZAsFfCGJrGt1sQX3uqdwhR4fMIhRKwV" target="_blank" class="ui-action">→ Datenschutzerklärung-Template öffnen</a></div><span class="ui-date">März 2026</span></li>
+  </ul>
+</div>
+
+<script>
+// ── SUPABASE CONFIG ──
+const SUPABASE_URL = 'https://rjvdmyjuqtchznlhffzo.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqdmRteWp1cXRjaHpubGhmZnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTkzNDksImV4cCI6MjA4NjkzNTM0OX0.iJWzPFxAI-ms7qCD6s0-Sxuqksy0ix1X-l1uNmxCZu0'
+const ALLOWED_PLANS = ['standard', 'enterprise']
+
+const { createClient } = supabase
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// ── INIT ──
+async function init() {
+  const { data: { session } } = await sb.auth.getSession()
+  if (session) {
+    document.getElementById('userEmail').textContent = session.user.email
+    await checkAccess(session.user.id)
+  } else {
+    document.getElementById('loadingScreen').classList.add('hidden')
+    // Auth overlay schon sichtbar
+  }
+}
+
+// ── ZUGRIFF PRÜFEN ──
+async function checkAccess(userId) {
+  const { data, error } = await sb
+    .from('user_subscriptions')
+    .select('plan, status')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+
+  document.getElementById('loadingScreen').classList.add('hidden')
+
+  const hasAccess = data?.some(s => ALLOWED_PLANS.includes(s.plan))
+
+  if (hasAccess) {
+    document.getElementById('authOverlay').classList.add('hidden')
+  } else {
+    document.getElementById('loginBox').style.display = 'none'
+    document.getElementById('noAccessBox').style.display = 'block'
+  }
+}
+
+// ── LOGIN ──
+async function doLogin() {
+  const email = document.getElementById('emailInput').value.trim()
+  const password = document.getElementById('passwordInput').value
+  const btn = document.getElementById('loginBtn')
+  const err = document.getElementById('authError')
+
+  if (!email || !password) {
+    err.textContent = 'Bitte E-Mail und Passwort eingeben.'
+    err.style.display = 'block'
+    return
+  }
+
+  btn.disabled = true
+  btn.textContent = 'Wird angemeldet...'
+  err.style.display = 'none'
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password })
+
+  if (error) {
+    err.textContent = 'Anmeldung fehlgeschlagen. Bitte prüfen Sie Ihre Zugangsdaten.'
+    err.style.display = 'block'
+    btn.disabled = false
+    btn.textContent = 'Einloggen →'
+    return
+  }
+
+  document.getElementById('userEmail').textContent = data.user.email
+  await checkAccess(data.user.id)
+  btn.disabled = false
+  btn.textContent = 'Einloggen →'
+}
+
+// ── PASSWORT VERGESSEN ──
+async function doForgotPassword() {
+  const email = document.getElementById('emailInput').value.trim()
+  if (!email) {
+    alert('Bitte geben Sie zuerst Ihre E-Mail-Adresse ein.')
+    return
+  }
+
+  await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href,
+  })
+
+  document.getElementById('loginBox').style.display = 'none'
+  document.getElementById('resetBox').style.display = 'block'
+}
+
+function showLoginBox() {
+  document.getElementById('loginBox').style.display = 'block'
+  document.getElementById('resetBox').style.display = 'none'
+}
+
+// ── LOGOUT ──
+async function doLogout() {
+  await sb.auth.signOut()
+  document.getElementById('authOverlay').classList.remove('hidden')
+  document.getElementById('noAccessBox').style.display = 'none'
+  document.getElementById('loginBox').style.display = 'block'
+  document.getElementById('userEmail').textContent = ''
+}
+
+// ── ENTER-TASTE LOGIN ──
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !document.getElementById('authOverlay').classList.contains('hidden')) {
+    doLogin()
+  }
+})
+
+// ── ACCORDION ──
+function tog(el) {
+  var hd = el.classList.contains('tcat-hd') ? el : el.closest('.tcat-hd')
+  var body = hd.nextElementSibling
+  var isOpen = hd.classList.contains('open')
+  document.querySelectorAll('.tcat-hd.open').forEach(function(h) { h.classList.remove('open'); h.nextElementSibling.classList.remove('open'); })
+  if (!isOpen) { hd.classList.add('open'); body.classList.add('open'); }
+}
+
+// ── DOWNLOAD ──
+function dl(url) { window.open(url, '_blank'); }
+
+// ── START ──
+init()
+</script>
+</body>
+</html>
