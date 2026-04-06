@@ -169,7 +169,7 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
   <span class="hplan">Standard</span>
   <div class="hright">
     <span id="userEmail"></span>
-    <a href="mailto:zehndergovernance@gmail.com?subject=Support" class="hsupport">✉ Support</a>
+    <a href="/cdn-cgi/l/email-protection#e69c838e8882839481899083948887888583a6818b878f8ac885898bd99593848c838592dbb5939696899492" class="hsupport">✉ Support</a>
     <a href="https://zehndergovernance.com" class="hback">← Website</a>
     <button class="hlogout" onclick="doLogout()">Ausloggen</button>
   </div>
@@ -183,7 +183,7 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
     <div class="wmeta">
       <span class="wm"><strong>Plan:</strong> Compliance Flatrate Standard</span>
       <span class="wm"><strong>Dokumente:</strong> 130+ in DE & EN</span>
-      <span class="wm"><strong>Support:</strong> zehndergovernance@gmail.com</span>
+      <span class="wm"><strong>Support:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4238272a2c262730252d3427302c232c212702252f232b2e6c212d2f">[email&#160;protected]</a></span>
     </div>
   </div>
 
@@ -192,9 +192,9 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
   <div class="sh">Schnellzugriff</div>
   <div class="tools-grid">
     <a href="https://tally.so/r/QK70vX" target="_blank" class="tool-card"><div class="tool-icon">🤖</div><div class="tool-name">AI Risk Check</div><div class="tool-desc">KI-Tool kostenlos bewerten — EU AI Act & DSGVO</div><div class="tool-btn">Starten →</div></a>
-    <a href="https://zg-academy.vercel.app" target="_blank" class="tool-card"><div class="tool-icon">🎓</div><div class="tool-name">Academy</div><div class="tool-desc">11 Schulungsmodule mit Zertifikat</div><div class="tool-btn">Öffnen →</div></a>
+    <a href="https://zg-schulungen.vercel.app" target="_blank" class="tool-card"><div class="tool-icon">🎓</div><div class="tool-name">Academy</div><div class="tool-desc">11 Schulungsmodule mit Zertifikat</div><div class="tool-btn">Öffnen →</div></a>
     <a href="https://zg-country-intelligence.vercel.app" target="_blank" class="tool-card"><div class="tool-icon">🌍</div><div class="tool-name">Country Intelligence</div><div class="tool-desc">TIA-Risikoscores für 13 Länder</div><div class="tool-btn">Öffnen →</div></a>
-    <a href="mailto:zehndergovernance@gmail.com" class="tool-card"><div class="tool-icon">✉</div><div class="tool-name">Support</div><div class="tool-desc">Fragen zu Dokumenten oder Compliance</div><div class="tool-btn">Kontaktieren →</div></a>
+    <a href="/cdn-cgi/l/email-protection#5c2639343238392e3b332a392e323d323f391c3b313d3530723f3331" class="tool-card"><div class="tool-icon">✉</div><div class="tool-name">Support</div><div class="tool-desc">Fragen zu Dokumenten oder Compliance</div><div class="tool-btn">Kontaktieren →</div></a>
   </div>
 
   <!-- SEARCH -->
@@ -722,7 +722,7 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
 
       <div style="background:rgba(192,140,40,.05);border-top:1px solid rgba(192,140,40,.15);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
         <div><div style="font-size:13px;font-weight:600;color:#fff;margin-bottom:3px;">🎓 Interaktiv mit Zertifikat</div><div style="font-size:12px;color:rgba(255,255,255,.45);">Alle Module auch interaktiv mit Quiz und Zertifikat in der Compliance Academy verfügbar.</div></div>
-        <a href="https://zg-academy.vercel.app" target="_blank" style="background:var(--gold);color:var(--ink);padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;">Academy öffnen →</a>
+        <a href="https://zg-schulungen.vercel.app" target="_blank" style="background:var(--gold);color:var(--ink);padding:9px 18px;border-radius:7px;font-size:13px;font-weight:600;">Academy öffnen →</a>
       </div>
 
     </div>
@@ -736,7 +736,7 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
 
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SUPABASE_URL='https://rjvdmyjuqtchznlhffzo.supabase.co';
 const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJqdmRteWp1cXRjaHpubGhmZnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzEzNTkzNDksImV4cCI6MjA4NjkzNTM0OX0.iJWzPFxAI-ms7qCD6s0-Sxuqksy0ix1X-l1uNmxCZu0';
 const ALLOWED_PLANS=['standard','enterprise'];
@@ -819,18 +819,4 @@ function doSearch(){
   // Show all categories when searching
   if(q){
     document.querySelectorAll('.cat-section').forEach(s=>s.style.display='block');
-    document.querySelectorAll('.cat-header').forEach(h=>{h.classList.add('open');h.nextElementSibling.classList.add('open');});
-  }
-  updateCount(q,visible);
-}
-
-function updateCount(q,visible){
-  const el=document.getElementById('searchCount');
-  if(q&&visible!==undefined){el.textContent=visible+' Dokumente gefunden';}
-  else{el.textContent='130+ Dokumente in 7 Kategorien';}
-}
-
-init();
-</script>
-</body>
-</html>
+    document.querySelectorAll('.cat-header').forEach(h=>{h.cl
