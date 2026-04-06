@@ -169,7 +169,7 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
   <span class="hplan">Standard</span>
   <div class="hright">
     <span id="userEmail"></span>
-    <a href="/cdn-cgi/l/email-protection#e69c838e8882839481899083948887888583a6818b878f8ac885898bd99593848c838592dbb5939696899492" class="hsupport">✉ Support</a>
+    <a href="/cdn-cgi/l/email-protection#91ebf4f9fff5f4e3f6fee7f4e3fff0fff2f4d1f6fcf0f8fdbff2fefcaee2e4f3fbf4f2e5acc2e4e1e1fee3e5" class="hsupport">✉ Support</a>
     <a href="https://zehndergovernance.com" class="hback">← Website</a>
     <button class="hlogout" onclick="doLogout()">Ausloggen</button>
   </div>
@@ -183,7 +183,7 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
     <div class="wmeta">
       <span class="wm"><strong>Plan:</strong> Compliance Flatrate Standard</span>
       <span class="wm"><strong>Dokumente:</strong> 130+ in DE & EN</span>
-      <span class="wm"><strong>Support:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4238272a2c262730252d3427302c232c212702252f232b2e6c212d2f">[email&#160;protected]</a></span>
+      <span class="wm"><strong>Support:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="95eff0fdfbf1f0e7f2fae3f0e7fbf4fbf6f0d5f2f8f4fcf9bbf6faf8">[email&#160;protected]</a></span>
     </div>
   </div>
 
@@ -194,7 +194,7 @@ header{background:rgba(11,31,18,.98);border-bottom:1px solid var(--border);paddi
     <a href="https://tally.so/r/QK70vX" target="_blank" class="tool-card"><div class="tool-icon">🤖</div><div class="tool-name">AI Risk Check</div><div class="tool-desc">KI-Tool kostenlos bewerten — EU AI Act & DSGVO</div><div class="tool-btn">Starten →</div></a>
     <a href="https://zg-schulungen.vercel.app" target="_blank" class="tool-card"><div class="tool-icon">🎓</div><div class="tool-name">Academy</div><div class="tool-desc">11 Schulungsmodule mit Zertifikat</div><div class="tool-btn">Öffnen →</div></a>
     <a href="https://zg-country-intelligence.vercel.app" target="_blank" class="tool-card"><div class="tool-icon">🌍</div><div class="tool-name">Country Intelligence</div><div class="tool-desc">TIA-Risikoscores für 13 Länder</div><div class="tool-btn">Öffnen →</div></a>
-    <a href="/cdn-cgi/l/email-protection#5c2639343238392e3b332a392e323d323f391c3b313d3530723f3331" class="tool-card"><div class="tool-icon">✉</div><div class="tool-name">Support</div><div class="tool-desc">Fragen zu Dokumenten oder Compliance</div><div class="tool-btn">Kontaktieren →</div></a>
+    <a href="/cdn-cgi/l/email-protection#3248575a5c565740555d4457405c535c515772555f535b5e1c515d5f" class="tool-card"><div class="tool-icon">✉</div><div class="tool-name">Support</div><div class="tool-desc">Fragen zu Dokumenten oder Compliance</div><div class="tool-btn">Kontaktieren →</div></a>
   </div>
 
   <!-- SEARCH -->
@@ -820,3 +820,18 @@ function doSearch(){
   if(q){
     document.querySelectorAll('.cat-section').forEach(s=>s.style.display='block');
     document.querySelectorAll('.cat-header').forEach(h=>{h.cl
+    document.querySelectorAll('.cat-header').forEach(h=>{h.classList.toggle('open',true)});
+  } else {
+    document.querySelectorAll('.cat-section').forEach(s=>{
+      const hasMatch = s.querySelectorAll('.doc-card:not([style*="display: none"])').length > 0;
+      s.style.display = hasMatch ? 'block' : 'none';
+    });
+    document.querySelectorAll('.cat-header').forEach(h=>{
+      const sec = h.nextElementSibling;
+      h.classList.toggle('open', sec && sec.style.display !== 'none');
+    });
+  }
+}
+</script>
+</body>
+</html>
