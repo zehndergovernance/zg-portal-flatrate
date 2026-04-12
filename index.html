@@ -819,7 +819,6 @@ function doSearch(){
   // Show all categories when searching
   if(q){
     document.querySelectorAll('.cat-section').forEach(s=>s.style.display='block');
-    document.querySelectorAll('.cat-header').forEach(h=>{h.cl
     document.querySelectorAll('.cat-header').forEach(h=>{h.classList.toggle('open',true)});
   } else {
     document.querySelectorAll('.cat-section').forEach(s=>{
@@ -832,6 +831,7 @@ function doSearch(){
     });
   }
 }
+init();
 </script>
 </body>
 </html>
