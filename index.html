@@ -980,14 +980,24 @@ init();
 
     const objectUrl = URL.createObjectURL(blob);
 
-    if (config.openInNewTab) {
-      // Im neuen Tab öffnen — Browser entscheidet ob Inline-Anzeige (PDF) oder Download
+    // MIME-basiert: nur PDF/Image/Text inline öffnen, sonst direkt downloaden
+    // (window.open ignoriert Content-Disposition → Office/ZIP würden als
+    // leerer Tab + UUID-Name landen statt mit echtem Namen runtergeladen)
+    const contentType = resp.headers.get('Content-Type') || '';
+    const canRenderInline =
+      contentType.startsWith('application/pdf') ||
+      contentType.startsWith('image/') ||
+      contentType.startsWith('text/');
+
+    if (config.openInNewTab && canRenderInline) {
+      // Inline-fähig im neuen Tab öffnen
       const w = window.open(objectUrl, '_blank');
       if (!w) {
         // Pop-up-Blocker → Fallback Download
         triggerDownload(objectUrl, filename);
       }
     } else {
+      // Office, ZIP, etc. → direkt Download mit echtem Filename
       triggerDownload(objectUrl, filename);
     }
 
