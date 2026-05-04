@@ -742,6 +742,7 @@ const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const ALLOWED_PLANS=['standard','enterprise'];
 const {createClient}=supabase;
 const sb=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+window.sb=sb;
 
 async function init(){
   const {data:{session}}=await sb.auth.getSession();
